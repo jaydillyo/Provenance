@@ -262,56 +262,54 @@
 
 - (void)glkView:(GLKView *)view drawInRect:(CGRect)rect
 {
-    void (^renderBlock)(void) = ^() {
-        glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        CGSize screenSize = [self.emulatorCore screenRect].size;
-        CGSize bufferSize = [self.emulatorCore bufferSize];
-
-        CGFloat texWidth = (screenSize.width / bufferSize.width);
-        CGFloat texHeight = (screenSize.height / bufferSize.height);
-
+    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    CGRect screenRect = self.emulatorCore.screenRect;
+    CGSize bufferSize = [self.emulatorCore bufferSize];
+    
+    CGFloat texStartX = CGRectGetMinX(screenRect) / bufferSize.width;
+    CGFloat texStartY = CGRectGetMinY(screenRect) / bufferSize.height;
+    
+    CGFloat texEndX = CGRectGetMaxX(screenRect) / bufferSize.width;
+    CGFloat texEndY = CGRectGetMaxY(screenRect) / bufferSize.height;
+    
+    // use oneToOne to view without scaling. Useful for debugging.
+    void (^renderBlock)(bool oneToOne) = ^(bool oneToOne) {
         // Determine if core wants special sizing
         BOOL widescreen = [self.emulatorCore wideScreen];
-        
-        if(widescreen) {
-            vertices[0] = GLKVector3Make(-1.2, -1.0,  1.0); // Left  bottom
-            vertices[1] = GLKVector3Make( 1.0, -1.0,  1.0); // Right bottom
-            vertices[2] = GLKVector3Make( 1.0,  1.0,  1.0); // Right top
-            vertices[3] = GLKVector3Make(-1.2,  1.0,  1.0); // Left  top
-            
-            textureCoordinates[0] = GLKVector2Make(0.0f, texHeight); // Left bottom
-            textureCoordinates[1] = GLKVector2Make(texWidth*1.1f, texHeight); // Right bottom
-            textureCoordinates[2] = GLKVector2Make(texWidth*1.1f, 0.0f); // Right top
-            textureCoordinates[3] = GLKVector2Make(0.0f, 0.0f); // Left top
-        } else {
-            vertices[0] = GLKVector3Make(-1.0, -1.0,  1.0); // Left  bottom
-            vertices[1] = GLKVector3Make( 1.0, -1.0,  1.0); // Right bottom
-            vertices[2] = GLKVector3Make( 1.0,  1.0,  1.0); // Right top
-            vertices[3] = GLKVector3Make(-1.0,  1.0,  1.0); // Left  top
-            
-            textureCoordinates[0] = GLKVector2Make(0.0f, texHeight); // Left bottom
-            textureCoordinates[1] = GLKVector2Make(texWidth, texHeight); // Right bottom
-            textureCoordinates[2] = GLKVector2Make(texWidth, 0.0f); // Right top
-            textureCoordinates[3] = GLKVector2Make(0.0f, 0.0f); //
+        CGRect screenSurface = rect;
+        if(oneToOne) {
+            screenSurface = CGRectZero;
+            screenSurface.size.height = 480.0;
+            screenSurface.size.width = 480.0 * (rect.size.width / rect.size.height);
         }
-
+        
+        glViewport(0, 0, screenSurface.size.width, screenSurface.size.height);
+        vertices[0] = GLKVector3Make(-1.0, -1.0,  1.0); // Left  bottom
+        vertices[1] = GLKVector3Make( 1.0, -1.0,  1.0); // Right bottom
+        vertices[2] = GLKVector3Make( 1.0,  1.0,  1.0); // Right top
+        vertices[3] = GLKVector3Make(-1.0,  1.0,  1.0); // Left  top
+        
+        textureCoordinates[0] = GLKVector2Make(texStartX, texEndY); // Left bottom
+        textureCoordinates[1] = GLKVector2Make(texEndX, texEndY); // Right bottom
+        textureCoordinates[2] = GLKVector2Make(texEndX, texStartY); // Right top
+        textureCoordinates[3] = GLKVector2Make(texStartX, texStartY); // Left top
+        
         int vertexIndices[6] = {
             // Front
             0, 1, 2,
             0, 2, 3,
         };
-
+        
         for (int i = 0; i < 6; i++) {
             triangleVertices[i]  = vertices[vertexIndices[i]];
             triangleTexCoords[i] = textureCoordinates[vertexIndices[i]];
         }
-//GLenum error;
+        //GLenum error;
         glBindTexture(GL_TEXTURE_2D, texture);
-  //      error = glGetError();
-        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, self.emulatorCore.bufferSize.width, self.emulatorCore.bufferSize.height, [self.emulatorCore pixelFormat], [self.emulatorCore pixelType], self.emulatorCore.videoBuffer);
-//error = glGetError();
+        //      error = glGetError();
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bufferSize.width, bufferSize.height, [self.emulatorCore pixelFormat], [self.emulatorCore pixelType], self.emulatorCore.videoBuffer);
+        //error = glGetError();
         if (texture)
         {
             if ( [[PVSettingsModel sharedInstance] crtFilterEnabled] )
@@ -328,12 +326,12 @@
                 self.effect.useConstantColor = YES;
             }
         }
-
+        
         if ( [[PVSettingsModel sharedInstance] crtFilterEnabled] )
         {
             glUseProgram( crtShaderProgram );
             glUniform1i( crtUniform_EmulatedImage, 0 );
-            glUniform4f( crtUniform_EmulatedImageRes, screenSize.width, screenSize.height, bufferSize.width, bufferSize.height );
+            glUniform4f( crtUniform_EmulatedImageRes, screenRect.size.width, screenRect.size.height, bufferSize.width, bufferSize.height );
             float finalResWidth = view.drawableWidth;
             float finalResHeight = view.drawableHeight;
             glUniform2f( crtUniform_FinalRes, finalResWidth, finalResHeight );
@@ -342,38 +340,43 @@
         {
             [self.effect prepareToDraw];
         }
-
+        
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_CULL_FACE);
-
+        
         glEnableVertexAttribArray(GLKVertexAttribPosition);
         glVertexAttribPointer(GLKVertexAttribPosition, 3, GL_FLOAT, GL_FALSE, 0, triangleVertices);
-
+        
         if (texture)
         {
             glEnableVertexAttribArray(GLKVertexAttribTexCoord0);
             glVertexAttribPointer(GLKVertexAttribTexCoord0, 2, GL_FLOAT, GL_FALSE, 0, triangleTexCoords);
         }
-
+        
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
+        
         if (texture)
         {
             glDisableVertexAttribArray(GLKVertexAttribTexCoord0);
         }
-
+        
         glDisableVertexAttribArray(GLKVertexAttribPosition);
     };
-
-    if (self.emulatorCore.isSpeedModified)
-    {
-        renderBlock();
+    
+    if (self.emulatorCore.isSpeedModified){
+        renderBlock(false);
+#if defined(PVGL_SHOW_ONE_TO_ONE) && PVGL_SHOW_ONE_TO_ONE
+        renderBlock(true);
+#endif
     }
     else
     {
         @synchronized(self.emulatorCore)
         {
-            renderBlock();
+            renderBlock(false);
+#if defined(PVGL_SHOW_ONE_TO_ONE) && PVGL_SHOW_ONE_TO_ONE
+            renderBlock(true);
+#endif
         }
     }
 }
