@@ -29,9 +29,19 @@
 @property (weak, nonatomic) IBOutlet UILabel *iCadeControllerSetting;
 @property (weak, nonatomic) IBOutlet UILabel *crtFilterLabel;
 
+@property (copy, readonly) NSString* localizedOnLabel;
+@property (copy, readonly) NSString* localizedOffLabel;
 @end
 
 @implementation PVTVSettingsViewController
+
+- (NSString *) localizedOnLabel {
+    return NSLocalizedStringFromTable(@"On", @"PVTVSettingsViewController", @"On Label for Settings");
+}
+
+- (NSString *) localizedOffLabel {
+    return NSLocalizedStringFromTable(@"Off", @"PVTVSettingsViewController", @"Off Label for Settings");
+}
 
 - (instancetype)init
 {
@@ -54,74 +64,80 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
-    self.splitViewController.title = @"Settings";
-
     [self.tableView setBackgroundView:nil];
     [self.tableView setBackgroundColor:[UIColor clearColor]];
+}
 
+- (void) updateLabels {
+    NSString* onString = self.localizedOnLabel;
+    NSString* offString = self.localizedOffLabel;
+    
     PVSettingsModel *settings = [PVSettingsModel sharedInstance];
-    [self.autoSaveValueLabel setText:([settings autoSave]) ? @"On" : @"Off"];
-    [self.autoLoadValueLabel setText:([settings autoLoadAutoSaves]) ? @"On" : @"Off"];
-    [self.showFPSCountValueLabel setText:([settings showFPSCount]) ? @"On" : @"Off"];
-    [self.crtFilterLabel setText:([settings crtFilterEnabled]) ? @"On" : @"Off"];
-	NSString *versionText = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-	versionText = [versionText stringByAppendingFormat:@" (%@)", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
-	[self.versionValueLabel setText:versionText];
+    self.autoSaveValueLabel.text = settings.autoSave ? onString : offString;
+    self.autoLoadValueLabel.text = settings.autoLoadAutoSaves ? onString : offString;
+    self.showFPSCountValueLabel.text = settings.showFPSCount ? onString : offString;
+    self.crtFilterLabel.text = settings.crtFilterEnabled ? onString : offString;
+    
+    NSString *versionText = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    versionText = [versionText stringByAppendingFormat:@" (%@)", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
+    [self.versionValueLabel setText:versionText];
+    
+    NSString* modeString = @"RELEASE";
+    
 #if DEBUG
-    [self.modeValueLabel setText:@"DEBUG"];
-#else
-    [self.modeValueLabel setText:@"RELEASE"];
+    modeString = @"DEBUG";
 #endif
+    
+    self.modeValueLabel.text = modeString;
+    
     NSString *revisionString = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Revision"];
     UIColor *color = [UIColor colorWithWhite:0.0 alpha:0.1];
-
+    
     if ([revisionString length] > 0) {
-        [self.revisionLabel setText:revisionString];
+        self.revisionLabel.text = revisionString;
     } else {
-        [self.revisionLabel setTextColor:color];
-        [self.revisionLabel setText:@"(none)"];
+        self.revisionLabel.textColor = color;
+        self.revisionLabel.text = NSLocalizedStringFromTable(@"(none)", @"PVTVSettingsViewController", @"Revision label title indicating no revision found");
     }
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
-    self.splitViewController.title = @"Settings";
+    
+    self.splitViewController.title = NSLocalizedStringFromTable(@"Settings", @"PVTVSettingsViewController", @"Settings View Title");
     PVSettingsModel *settings = [PVSettingsModel sharedInstance];
     [self.iCadeControllerSetting setText:kIcadeControllerSettingToString([settings iCadeControllerSetting])];
+    [self updateLabels];
 }
 
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     PVSettingsModel *settings = [PVSettingsModel sharedInstance];
-
+    
     switch ([indexPath section]) {
         case 0:
             // emu settings
             switch ([indexPath row]) {
                 case 0:
                     // Auto save
-                    [settings setAutoSave:![settings autoSave]];
-                    [self.autoSaveValueLabel setText:([settings autoSave]) ? @"On" : @"Off"];
+                    settings.autoSave = !settings.autoSave;
                     break;
                 case 1:
                     // auto load
-                    [settings setAutoLoadAutoSaves:![settings autoLoadAutoSaves]];
-                    [self.autoLoadValueLabel setText:([settings autoLoadAutoSaves]) ? @"On" : @"Off"];
+                    settings.autoLoadAutoSaves = !settings.autoLoadAutoSaves;
                     break;
                 case 2:
-                    [settings setCrtFilterEnabled:![settings crtFilterEnabled]];
-                    [self.crtFilterLabel setText:([settings crtFilterEnabled]) ? @"On" : @"Off"];
+                    settings.crtFilterEnabled = !settings.crtFilterEnabled;
                     break;
                 case 3:
-                    [settings setShowFPSCount:![settings showFPSCount]];
-                    [self.showFPSCountValueLabel setText:([settings showFPSCount]) ? @"On" : @"Off"];
+                    settings.showFPSCount = !settings.showFPSCount;
+                    break;
                 default:
                     break;
             }
+            [self updateLabels];
             break;
         case 1:
             // icase settings
@@ -129,67 +145,105 @@
         case 2:
             // library settings
             switch ([indexPath row]) {
-				case 0: {
-					// start webserver
-					// Check to see if we are connected to WiFi. Cannot continue otherwise.
-					Reachability *reachability = [Reachability reachabilityForInternetConnection];
-					[reachability startNotifier];
-
-					NetworkStatus status = [reachability currentReachabilityStatus];
-
-					if (status != ReachableViaWiFi)
-					{
-						UIAlertController *alert = [UIAlertController alertControllerWithTitle: @"Unable to start web server!"
-																					   message: @"Your device needs to be connected to a WiFi network to continue!"
-																				preferredStyle:UIAlertControllerStyleAlert];
-						[alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-						}]];
-						[self presentViewController:alert animated:YES completion:NULL];
-					} else {
-						// connected via wifi, let's continue
-
-						// start web transfer service
-						[[PVWebServer sharedInstance] startServer];
-
-						// get the IP address of the device
-						NSString *ipAddress = [[PVWebServer sharedInstance] getIPAddress];
-
+                case 0: {
+                    // start webserver
+                    // Check to see if we are connected to WiFi. Cannot continue otherwise.
+                    Reachability *reachability = [Reachability reachabilityForInternetConnection];
+                    [reachability startNotifier];
+                    
+                    NetworkStatus status = [reachability currentReachabilityStatus];
+                    
+                    if (status != ReachableViaWiFi)
+                    {
+                        NSString *alertTitle = NSLocalizedStringFromTable(@"Unable to start web server!",
+                                                                          @"PVTVSettingsViewController",
+                                                                          @"Alert Title");
+                        NSString *alertMessage = NSLocalizedStringFromTable(@"Your device needs to be connected to a WiFi network to continue!",
+                                                                            @"PVTVSettingsViewController",
+                                                                            @"Alert Message");
+                        
+                        UIAlertController *alert = [UIAlertController alertControllerWithTitle: alertTitle
+                                                                                       message: alertMessage
+                                                                                preferredStyle:UIAlertControllerStyleAlert];
+                        
+                        NSString *okButtonTitle = NSLocalizedStringFromTable(@"OK", @"PVTVSettingsViewController", @"OK button title");
+                        [alert addAction:[UIAlertAction actionWithTitle:okButtonTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        }]];
+                        [self presentViewController:alert animated:YES completion:NULL];
+                    } else {
+                        // connected via wifi, let's continue
+                        
+                        // start web transfer service
+                        [[PVWebServer sharedInstance] startServer];
+                        
+                        // get the IP address of the device
+                        NSString *ipAddress = [[PVWebServer sharedInstance] getIPAddress];
+                        
 #if TARGET_IPHONE_SIMULATOR
-						ipAddress = [ipAddress stringByAppendingString:@":8080"];
+                        ipAddress = [ipAddress stringByAppendingString:@":8080"];
 #endif
-
-						NSString *message = [NSString stringWithFormat: @"You can now upload ROMs or download saves by visiting:\nhttp://%@/\non your computer", ipAddress];
-						UIAlertController *alert = [UIAlertController alertControllerWithTitle: @"Web server started!"
-																					   message: message
-																				preferredStyle:UIAlertControllerStyleAlert];
-						[alert addAction:[UIAlertAction actionWithTitle:@"Stop" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-							[[PVWebServer sharedInstance] stopServer];
-						}]];
-						[self presentViewController:alert animated:YES completion:NULL];
-					}
-				}
+                        NSString *alertTitle = NSLocalizedStringFromTable(@"Web server started!", @"PVTVSettingsViewController", @"Alert Title");
+                        
+                        NSString *alertMessageFormat = NSLocalizedStringFromTable(@"You can now upload ROMs or download saves by visiting:\nhttp://%@/\non your computer",
+                                                                             @"PVTVSettingsViewController", @"Alert Message");
+                        
+                        NSString *alertMessage = [NSString stringWithFormat: alertMessageFormat, ipAddress];
+                        UIAlertController *alert = [UIAlertController alertControllerWithTitle: alertTitle
+                                                                                       message: alertMessage
+                                                                                preferredStyle:UIAlertControllerStyleAlert];
+                        
+                        NSString *stopButtonTitle = NSLocalizedStringFromTable(@"Stop", @"PVTVSettingsViewController", @"Stop button title");
+                        
+                        [alert addAction:[UIAlertAction actionWithTitle:stopButtonTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                            [[PVWebServer sharedInstance] stopServer];
+                        }]];
+                        [self presentViewController:alert animated:YES completion:NULL];
+                    }
+                }
                 case 1: {
+                    
+                    NSString *alertTitle = NSLocalizedStringFromTable(@"Refresh Game Library?", @"PVTVSettingsViewController", @"Alert Title");
+                    
+                    NSString *alertMessage = NSLocalizedStringFromTable(@"Attempt to get artwork and title information for your library. This can be a slow process, especially for large libraries. Only do this if you really, really want to try and get more artwork. Please be patient, as this process can take several minutes.",
+                                                                         @"PVTVSettingsViewController", @"Alert Message");
+                    
                     // refresh
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Refresh Game Library?"
-                                                                                   message:@"Attempt to get artwork and title information for your library. This can be a slow process, especially for large libraries. Only do this if you really, really want to try and get more artwork. Please be patient, as this process can take several minutes."
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:alertTitle
+                                                                                   message:alertMessage
                                                                             preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    
+                    NSString *yesButtonTitle = NSLocalizedStringFromTable(@"Yes", @"PVTVSettingsViewController", @"Yes button title");
+                    
+                    [alert addAction:[UIAlertAction actionWithTitle:yesButtonTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [[NSNotificationCenter defaultCenter] postNotificationName:kRefreshLibraryNotification
                                                                             object:nil];
                     }]];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleCancel handler:NULL]];
+                    
+                    NSString *noButtonTitle = NSLocalizedStringFromTable(@"No", @"PVTVSettingsViewController", @"No button title");
+                    
+                    [alert addAction:[UIAlertAction actionWithTitle:noButtonTitle style:UIAlertActionStyleCancel handler:NULL]];
                     [self presentViewController:alert animated:YES completion:NULL];
                     break;
                 }
                 case 2: {
                     // empty cache
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Empty Image Cache?"
-                                                                                   message:@"Empty the image cache to free up disk space. Images will be redownload on demand."
+                    NSString *alertTitle = NSLocalizedStringFromTable(@"Empty Image Cache?", @"PVTVSettingsViewController", @"Alert Title");
+                    
+                    NSString *alertMessage = NSLocalizedStringFromTable(@"Empty the image cache to free up disk space. Images will be redownload on demand.",
+                                                                         @"PVTVSettingsViewController", @"Alert Message");
+                    
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:alertTitle
+                                                                                   message:alertMessage
                                                                             preferredStyle:UIAlertControllerStyleAlert];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                    
+                    NSString *yesButtonTitle = NSLocalizedStringFromTable(@"Yes", @"PVTVSettingsViewController", @"Yes button title");
+                    [alert addAction:[UIAlertAction actionWithTitle:yesButtonTitle style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
                         [PVMediaCache emptyCache];
                     }]];
-                    [alert addAction:[UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleCancel handler:NULL]];
+                    
+                    
+                    NSString *noButtonTitle = NSLocalizedStringFromTable(@"No", @"PVTVSettingsViewController", @"No button title");
+                    [alert addAction:[UIAlertAction actionWithTitle:noButtonTitle style:UIAlertActionStyleCancel handler:NULL]];
                     [self presentViewController:alert animated:YES completion:NULL];
                     break;
                 }
