@@ -28,6 +28,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *showFPSCountValueLabel;
 @property (weak, nonatomic) IBOutlet UILabel *iCadeControllerSetting;
 @property (weak, nonatomic) IBOutlet UILabel *crtFilterLabel;
+@property (weak, nonatomic) IBOutlet UILabel *imageSmoothingLabel;
 
 @property (copy, readonly) NSString* localizedOnLabel;
 @property (copy, readonly) NSString* localizedOffLabel;
@@ -77,6 +78,7 @@
     self.autoLoadValueLabel.text = settings.autoLoadAutoSaves ? onString : offString;
     self.showFPSCountValueLabel.text = settings.showFPSCount ? onString : offString;
     self.crtFilterLabel.text = settings.crtFilterEnabled ? onString : offString;
+    self.imageSmoothingLabel.text = settings.imageSmoothing ? onString : offString;
     
     NSString *versionText = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     versionText = [versionText stringByAppendingFormat:@" (%@)", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]];
@@ -131,9 +133,14 @@
                 case 2:
                     settings.crtFilterEnabled = !settings.crtFilterEnabled;
                     break;
+                    
                 case 3:
+                    settings.imageSmoothing = !settings.imageSmoothing;
+                    break;
+                case 4:
                     settings.showFPSCount = !settings.showFPSCount;
                     break;
+
                 default:
                     break;
             }
