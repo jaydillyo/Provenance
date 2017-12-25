@@ -2536,9 +2536,9 @@
 			buildPhases = (
 				1AD481B01BA350A400FDA50A /* Sources */,
 				1AD481B11BA350A400FDA50A /* Frameworks */,
+				1AD481B21BA350A400FDA50A /* Resources */,
 				1A44C0AE1D0A1E730018751A /* Set Build Number */,
 				E32D548D1D99C82E00C41A52 /* Set Git SHA */,
-				1AD481B21BA350A400FDA50A /* Resources */,
 				1AACCAE61BB60DB500DC21AE /* Embed Frameworks */,
 				BE9FDCC61C210B9F0046DF0E /* Embed App Extensions */,
 			);
@@ -2598,12 +2598,12 @@
 				ORGANIZATIONNAME = "James Addyman";
 				TargetAttributes = {
 					1A3D409317B2DCE4004DFFFC = {
-						DevelopmentTeam = 63497P68S6;
+                        DevelopmentTeam = 63497P68S6;
 						LastSwiftMigration = 0830;
 					};
 					1AD481B31BA350A400FDA50A = {
 						CreatedOnToolsVersion = 7.1;
-						DevelopmentTeam = 63497P68S6;
+                        DevelopmentTeam = 63497P68S6;
 						LastSwiftMigration = 0830;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -2618,7 +2618,7 @@
 					};
 					BE9FDCB61C210B9E0046DF0E = {
 						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = 63497P68S6;
+                        DevelopmentTeam = 63497P68S6;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
 								enabled = 0;
@@ -2727,7 +2727,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nbuildNumber=`git rev-list --count HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"";
+			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\")\nbuildNumber=`git rev-list --count HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\"";
 		};
 		1A44C0AE1D0A1E730018751A /* Set Build Number */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2741,7 +2741,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nbuildNumber=`git rev-list --count HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"";
+			shellScript = "buildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\")\nbuildNumber=`git rev-list --count HEAD`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\"";
 		};
 		E32D548D1D99C82E00C41A52 /* Set Git SHA */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2755,7 +2755,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "revision=$(git rev-parse --short HEAD)\n/usr/libexec/PlistBuddy -c \"Set :Revision $revision\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
+			shellScript = "revision=$(git rev-parse --short HEAD)\n/usr/libexec/PlistBuddy -c \"Set :Revision $revision\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\"\n";
 		};
 		E3D030EE1D980D9F00045BE6 /* Set Git SHA */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2769,7 +2769,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "revision=$(git rev-parse --short HEAD)\n/usr/libexec/PlistBuddy -c \"Set :Revision $revision\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n";
+			shellScript = "revision=$(git rev-parse --short HEAD)\n/usr/libexec/PlistBuddy -c \"Set :Revision $revision\" \"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Info.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -3411,7 +3411,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -3452,7 +3452,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -3499,7 +3499,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3552,7 +3552,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3605,7 +3605,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3849,7 +3849,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -3894,7 +3894,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -3931,7 +3931,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -3969,7 +3969,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 63497P68S6;
+                DEVELOPMENT_TEAM = 63497P68S6;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = (
