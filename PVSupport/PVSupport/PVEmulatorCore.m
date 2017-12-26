@@ -136,7 +136,7 @@ NSString *const PVEmulatorCoreErrorDomain = @"com.jamsoftonline.EmulatorCore.Err
         }
         frameCount += 1;
 
-        nextEmuTick += gameInterval;
+        nextEmuTick += self.gameInterval;
         sleepTime = nextEmuTick - GetSecondsSince(origin);
         if(sleepTime >= 0) {
             [NSThread sleepForTimeInterval:sleepTime];
@@ -186,9 +186,11 @@ NSString *const PVEmulatorCoreErrorDomain = @"com.jamsoftonline.EmulatorCore.Err
 - (void)setFramerateMultiplier:(CGFloat)framerateMultiplier
 {
 	_framerateMultiplier = framerateMultiplier;
-
     NSLog(@"multiplier: %.1f", framerateMultiplier);
-    gameInterval = 1.0 / ([self frameInterval] * framerateMultiplier);
+}
+
+- (NSTimeInterval) gameInterval {
+    return 1.0 / ([self frameInterval] * self.framerateMultiplier);
 }
 
 - (void)executeFrame

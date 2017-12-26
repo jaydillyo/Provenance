@@ -38,7 +38,6 @@ typedef NS_ENUM(NSInteger, PVEmulatorCoreErrorCode) {
 
 	double _sampleRate;
 	
-	NSTimeInterval gameInterval;
 	NSTimeInterval _frameInterval;
 
     BOOL isRunning;
@@ -53,6 +52,7 @@ typedef NS_ENUM(NSInteger, PVEmulatorCoreErrorCode) {
 @property (nonatomic, copy) NSString *BIOSPath;
 @property (nonatomic, copy) NSString *systemIdentifier;
 @property (nonatomic, strong) NSString* romMD5;
+@property (assign, readonly) NSTimeInterval gameInterval;
 
 @property (atomic, assign) BOOL shouldResyncTime;
 

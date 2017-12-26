@@ -921,25 +921,6 @@ static void emulation_run() {
 
     current->mednafenCoreTiming = current->masterClock / spec.MasterCycles;
     
-    // Fix for game stutter. mednafenCoreTiming flutters on init before settling and we only read it
-    // after the first frame wot set the current->gameInterval in the super class. This work around
-    // resets the value after a few frames. -Joe M
-    static int fixCount = 0;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        // The looping counter wasn't enough sometimes, just adding a 2 second one time trigger to rsset frame timing
-        // Need to investigate more why this happens at all but this seems to resolve with no known side effects - jm
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            current->gameInterval = 1.0 / current->mednafenCoreTiming;
-        });
-    });
-    
-    if(fixCount < 10) {
-        current->gameInterval = 1.0 / current->mednafenCoreTiming;
-        NSLog(@"%f", current->mednafenCoreTiming);
-        fixCount++;
-    }
-
     if(current->systemType == psx)
     {
         current->videoWidth = rects[spec.DisplayRect.y];
